@@ -362,6 +362,10 @@
         <p class="admin-note">Enter the admin password to manage listings.</p>
         <form class="admin-form admin-lock" id="admin-login-form">
           <div>
+            <label>Username</label>
+            <input required type="text" id="login-username" placeholder="Admin username" autocomplete="username" />
+          </div>
+          <div>
             <label>Password</label>
             <input required type="password" id="login-password" placeholder="Admin password" autocomplete="current-password" />
           </div>
@@ -1133,6 +1137,7 @@ function wireStaticEvents() {
 /* =========================================================================
    ADMIN — login gate, add/edit listings against the Google Sheet
    ========================================================================= */
+let adminUsername = null;
 let adminPassword = null;
 let editingListingId = null;
 
@@ -1165,9 +1170,11 @@ function wireAdminLogin() {
   const loginSubmit = document.getElementById("login-submit");
 
   // Stay logged in across a page refresh within the same browser tab
-  const stored = sessionStorage.getItem("apexAdminPw");
-  if (stored && !USE_MOCK_DATA) {
-    adminPassword = stored;
+  const storedUser = sessionStorage.getItem("apexAdminUser");
+  const storedPw = sessionStorage.getItem("apexAdminPw");
+  if (storedUser && storedPw && !USE_MOCK_DATA) {
+    adminUsername = storedUser;
+    adminPassword = storedPw;
     lockEl.classList.add("hidden");
     dashEl.classList.remove("hidden");
     loadAdminListings();
@@ -1176,6 +1183,7 @@ function wireAdminLogin() {
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     loginError.style.display = "none";
+    const username = document.getElementById("login-username").value;
     const password = document.getElementById("login-password").value;
 
     if (USE_MOCK_DATA) {
@@ -1190,20 +1198,22 @@ function wireAdminLogin() {
       const res = await fetch(`${API_BASE_URL}?action=login`, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ username, password }),
       });
       if (!res.ok) throw new Error("Request failed");
       const data = await res.json();
       if (data.error) throw new Error(data.error);
 
+      adminUsername = username;
       adminPassword = password;
+      sessionStorage.setItem("apexAdminUser", username);
       sessionStorage.setItem("apexAdminPw", password);
       loginForm.reset();
       lockEl.classList.add("hidden");
       dashEl.classList.remove("hidden");
       loadAdminListings();
     } catch (err) {
-      loginError.textContent = err.message === "Unauthorized" ? "Wrong password." : "Something went wrong — please try again.";
+      loginError.textContent = err.message === "Unauthorized" ? "Wrong username or password." : "Something went wrong — please try again.";
       loginError.style.display = "block";
     } finally {
       loginSubmit.disabled = false;
@@ -1212,7 +1222,9 @@ function wireAdminLogin() {
   });
 
   document.getElementById("admin-logout").addEventListener("click", () => {
+    adminUsername = null;
     adminPassword = null;
+    sessionStorage.removeItem("apexAdminUser");
     sessionStorage.removeItem("apexAdminPw");
     resetAdminForm();
     dashEl.classList.add("hidden");
@@ -1296,7 +1308,7 @@ function wireAdminForm() {
       errorEl.style.display = "block";
       return;
     }
-    if (!adminPassword) {
+    if (!adminUsername || !adminPassword) {
       errorEl.textContent = "Session expired — please log in again.";
       errorEl.style.display = "block";
       return;
@@ -1328,8 +1340,8 @@ function wireAdminForm() {
     try {
       const action = isEdit ? "updateListing" : "addListing";
       const body = isEdit
-        ? { password: adminPassword, id: editingListingId, listing }
-        : { password: adminPassword, listing };
+        ? { username: adminUsername, password: adminPassword, id: editingListingId, listing }
+        : { username: adminUsername, password: adminPassword, listing };
 
       const res = await fetch(`${API_BASE_URL}?action=${action}`, {
         method: "POST",
@@ -1350,8 +1362,10 @@ function wireAdminForm() {
       renderGrid();
     } catch (err) {
       if (err.message === "Unauthorized") {
-        // Stored password no longer matches ADMIN_PASSWORD on the backend
+        // Stored credentials no longer match the backend
+        adminUsername = null;
         adminPassword = null;
+        sessionStorage.removeItem("apexAdminUser");
         sessionStorage.removeItem("apexAdminPw");
         document.getElementById("admin-dashboard").classList.add("hidden");
         document.getElementById("admin-lock").classList.remove("hidden");
