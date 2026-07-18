@@ -184,6 +184,13 @@
   .admin-form input, .admin-form select, .admin-form textarea { background: var(--ink); border: 1px solid var(--line); border-radius: 2px; padding: 10px 12px; font-size: 13px; outline: none; width: 100%; resize: vertical; }
   .admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus { border-color: var(--brass); }
   .admin-form input::placeholder, .admin-form textarea::placeholder { color: var(--stone-dim); }
+  .image-upload-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .image-upload-row input[type="file"] { flex: none; width: auto; padding: 0; border: none; background: none; font-size: 12px; color: var(--stone); }
+  .upload-status { font-size: 12px; color: var(--stone-dim); }
+  .upload-status.uploading { color: var(--brass-light); }
+  .upload-status.error { color: #C79383; }
+  .image-preview-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .image-preview-row img { width: 72px; height: 56px; object-fit: cover; border-radius: 2px; border: 1px solid var(--line); }
   .admin-form .btn-brass { align-self: flex-start; margin-top: 4px; }
   .admin-password-block { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 18px; }
   .admin-note { font-size: 12.5px; color: var(--stone-dim); line-height: 1.6; margin-top: 10px; }
@@ -206,8 +213,12 @@
   #view-profile.hidden, #view-home.hidden, #view-admin.hidden { display: none; }
 
   /* ---- Responsive ---- */
-  @media (min-width: 1500px) {
+  @media (min-width: 1150px) and (max-width: 1499px) {
     .ledger-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  @media (min-width: 1500px) {
+    .ledger-grid { grid-template-columns: repeat(6, 1fr); }
   }
 
   @media (max-width: 860px) {
@@ -223,6 +234,10 @@
     .testimonial-row { grid-template-columns: 1fr; }
     .footer-grid { grid-template-columns: 1fr; gap: 28px; }
     .filter-count { margin-left: 0; }
+  }
+
+  @media (min-width: 861px) and (max-width: 1149px) {
+    .ledger-grid { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
 </head>
@@ -274,7 +289,7 @@
         <p class="hero-sub">Curated addresses across Maharashtra, handled with the discretion and precision of a private office — from first homes to grade-A commercial acquisitions.</p>
         <div class="hero-cta-row">
           <button class="btn-brass" id="hero-browse-btn">Browse Listings <span class="ic-arrow"></span></button>
-          <button class="btn-ghost" id="hero-profile-btn">Meet Masihuddin</button>
+          <button class="btn-ghost" id="hero-profile-btn">Meet Aarav</button>
         </div>
       </div>
     </section>
@@ -319,7 +334,7 @@
     <section class="profile-page">
       <div class="profile-hero">
         <div class="profile-photo-wrap">
-          <img src="https://iili.io/Cj8yXKN.jpg" alt="Masihuddin" />
+          <img src="https://images.unsplash.com/photo-1618077360395-f3068be8e001?w=600&q=80&auto=format&fit=crop" alt="Aarav Mehta" />
         </div>
         <div class="profile-intro">
           <p class="eyebrow">About ISMAIL REAL ESTATE</p>
@@ -328,7 +343,7 @@
           <p class="profile-bio">Masihuddin has spent the last fifteen years advising families and companies across Maharashtra on residential and commercial real estate — from first apartments to multi-crore commercial acquisitions. ISMAIL REAL ESTATE was founded on a simple idea: property decisions deserve the same discretion, rigour and personal attention as any other major financial decision.</p>
           <div class="credential-row" id="credential-row"></div>
           <div class="hero-cta-row">
-            <a class="btn-brass" href="tel:+919892691203" id="profile-call-btn">Call Masihuddin</a>
+            <a class="btn-brass" href="tel:+919892691203" id="profile-call-btn">Call Aarav</a>
             <button class="btn-ghost" id="profile-listings-btn">View Listings <span class="ic-arrow"></span></button>
           </div>
         </div>
@@ -454,12 +469,22 @@
             </div>
           </div>
           <div>
-            <label>Main Image URL</label>
-            <input required id="ad-image" placeholder="https://…" />
+            <label>Main Image</label>
+            <input required id="ad-image" placeholder="https://… (or upload a photo below)" />
+            <div class="image-upload-row">
+              <input type="file" id="ad-image-file" accept="image/*" />
+              <span class="upload-status" id="ad-image-upload-status"></span>
+            </div>
+            <div class="image-preview-row" id="ad-image-preview"></div>
           </div>
           <div>
             <label>Gallery URLs (one per line)</label>
             <textarea id="ad-gallery" rows="3" placeholder="https://…&#10;https://…"></textarea>
+            <div class="image-upload-row">
+              <input type="file" id="ad-gallery-files" accept="image/*" multiple />
+              <span class="upload-status" id="ad-gallery-upload-status"></span>
+            </div>
+            <div class="image-preview-row" id="ad-gallery-preview"></div>
           </div>
           <div>
             <label>Description</label>
@@ -1145,9 +1170,138 @@ function linesToArray(text) {
   return text.split("\n").map((s) => s.trim()).filter(Boolean);
 }
 
+function renderImagePreviews(containerId, urls) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = urls
+    .filter(Boolean)
+    .map((u) => `<img src="${escapeHtml(u)}" alt="" loading="lazy" />`)
+    .join("");
+}
+
+// Shrinks + compresses a photo client-side before upload, so we're not
+// sending multi-megabyte camera photos through the Apps Script POST body.
+function resizeImageFile(file, maxDim = 1600, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Couldn't read that file"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Couldn't read that image"));
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width >= height) {
+            height = Math.round(height * (maxDim / width));
+            width = maxDim;
+          } else {
+            width = Math.round(width * (maxDim / height));
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality).split(",")[1]); // base64 only, no data: prefix
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// Resizes + uploads one file to the Apps Script backend, which stores it in
+// Drive and hands back a public, embeddable image URL.
+async function uploadImageFile(file) {
+  if (USE_MOCK_DATA) {
+    throw new Error("Backend isn't connected yet — deploy the Apps Script, then set USE_MOCK_DATA to false and paste API_BASE_URL.");
+  }
+  if (!adminUsername || !adminPassword) {
+    throw new Error("Session expired — please log in again.");
+  }
+  const base64 = await resizeImageFile(file);
+  const filename = (file.name || "listing-photo").replace(/\.[^.]+$/, "") + ".jpg";
+  const res = await fetch(`${API_BASE_URL}?action=uploadImage`, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({
+      username: adminUsername,
+      password: adminPassword,
+      imageData: base64,
+      mimeType: "image/jpeg",
+      filename: filename,
+    }),
+  });
+  if (!res.ok) throw new Error("Request failed");
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data.url;
+}
+
+function wireImageUploads() {
+  const mainInput = document.getElementById("ad-image-file");
+  const mainStatus = document.getElementById("ad-image-upload-status");
+
+  mainInput.addEventListener("change", async () => {
+    const file = mainInput.files[0];
+    if (!file) return;
+    mainStatus.textContent = "Uploading…";
+    mainStatus.className = "upload-status uploading";
+    try {
+      const url = await uploadImageFile(file);
+      document.getElementById("ad-image").value = url;
+      renderImagePreviews("ad-image-preview", [url]);
+      mainStatus.textContent = "Uploaded.";
+      mainStatus.className = "upload-status";
+    } catch (err) {
+      mainStatus.textContent = err.message || "Upload failed — please try again.";
+      mainStatus.className = "upload-status error";
+    } finally {
+      mainInput.value = "";
+    }
+  });
+
+  const galleryInput = document.getElementById("ad-gallery-files");
+  const galleryStatus = document.getElementById("ad-gallery-upload-status");
+
+  galleryInput.addEventListener("change", async () => {
+    const files = Array.from(galleryInput.files);
+    if (!files.length) return;
+
+    const textarea = document.getElementById("ad-gallery");
+    const uploaded = [];
+    let failed = 0;
+
+    for (let i = 0; i < files.length; i++) {
+      galleryStatus.textContent = `Uploading ${i + 1}/${files.length}…`;
+      galleryStatus.className = "upload-status uploading";
+      try {
+        const url = await uploadImageFile(files[i]);
+        uploaded.push(url);
+      } catch (err) {
+        failed++;
+      }
+    }
+
+    if (uploaded.length) {
+      const existing = textarea.value.trim();
+      textarea.value = existing ? existing + "\n" + uploaded.join("\n") : uploaded.join("\n");
+      renderImagePreviews("ad-gallery-preview", linesToArray(textarea.value));
+    }
+
+    galleryStatus.className = failed ? "upload-status error" : "upload-status";
+    galleryStatus.textContent = failed
+      ? `${uploaded.length} uploaded, ${failed} failed — please retry those.`
+      : `${uploaded.length} photo(s) uploaded.`;
+    galleryInput.value = "";
+  });
+}
+
 function wireAdmin() {
   wireAdminLogin();
   wireAdminForm();
+  wireImageUploads();
 
   document.getElementById("admin-listing-rows").addEventListener("click", (e) => {
     const btn = e.target.closest(".admin-edit-btn");
@@ -1274,6 +1428,11 @@ function populateFormForEdit(listing) {
   document.getElementById("ad-description").value = listing.description || "";
   document.getElementById("ad-amenities").value = (listing.amenities || []).join("\n");
 
+  renderImagePreviews("ad-image-preview", listing.image ? [listing.image] : []);
+  renderImagePreviews("ad-gallery-preview", listing.gallery || []);
+  document.getElementById("ad-image-upload-status").textContent = "";
+  document.getElementById("ad-gallery-upload-status").textContent = "";
+
   document.getElementById("ad-submit").textContent = "Update Listing";
   document.getElementById("admin-form-heading").textContent = "Edit Listing";
   document.getElementById("admin-editing-note").style.display = "block";
@@ -1290,6 +1449,10 @@ function resetAdminForm() {
   document.getElementById("ad-submit").textContent = "Add Listing";
   document.getElementById("admin-form-heading").textContent = "Add a Listing";
   document.getElementById("admin-editing-note").style.display = "none";
+  renderImagePreviews("ad-image-preview", []);
+  renderImagePreviews("ad-gallery-preview", []);
+  document.getElementById("ad-image-upload-status").textContent = "";
+  document.getElementById("ad-gallery-upload-status").textContent = "";
 }
 
 function wireAdminForm() {
