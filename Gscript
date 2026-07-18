@@ -20,13 +20,19 @@
  * 4. Deploy > New deployment > gear icon > select type "Web app".
  *      - Execute as: Me
  *      - Who has access: Anyone
- *    Click Deploy and authorize again if asked.
+ *    Click Deploy and authorize again if asked. This version also touches
+ *    Google Drive (to store uploaded listing photos), so the authorization
+ *    prompt will now ask for a Drive permission too — approve it. It only
+ *    creates/uses one folder called "Apex Estates Listing Images", it
+ *    doesn't touch the rest of your Drive.
  * 5. Copy the "Web app URL" — it ends in /exec. That's your API_BASE_URL.
  *
  * IMPORTANT — updating the script later:
  * Editing this code does NOT update the live /exec URL by itself. After
  * changing code, go to Deploy > Manage deployments > edit (pencil) >
- * "New version" > Deploy, so the /exec URL picks up your changes.
+ * "New version" > Deploy, so the /exec URL picks up your changes. If you're
+ * adding image uploads to a deployment that predates them, this redeploy
+ * step is what triggers the new Drive authorization prompt — approve it.
  *
  * FRONTEND CHANGES NEEDED
  * ------------------------
@@ -205,6 +211,17 @@ function doPost(e) {
       return jsonResponse({ ok: true });
     }
 
+    if (action === "uploadImage") {
+      if (data.username !== ADMIN_USERNAME || data.password !== ADMIN_PASSWORD) {
+        return jsonResponse({ error: "Unauthorized" });
+      }
+      if (!data.imageData) {
+        return jsonResponse({ error: "No image data received" });
+      }
+      const url = uploadImage(data.imageData, data.mimeType, data.filename);
+      return jsonResponse({ ok: true, url: url });
+    }
+
     return jsonResponse({ error: "Unknown action: " + action });
   } catch (err) {
     return jsonResponse({ error: err.message });
@@ -288,6 +305,29 @@ function saveInquiry(payload) {
 }
 
 /* -----------------------------------------------------------------------
+   IMAGE UPLOADS — stores photos in a Drive folder next to this Sheet,
+   makes them public-viewable, and returns a directly embeddable URL.
+   ----------------------------------------------------------------------- */
+const IMAGE_FOLDER_NAME = "Apex Estates Listing Images";
+
+function getImageFolder() {
+  const folders = DriveApp.getFoldersByName(IMAGE_FOLDER_NAME);
+  if (folders.hasNext()) return folders.next();
+  return DriveApp.createFolder(IMAGE_FOLDER_NAME);
+}
+
+function uploadImage(imageDataBase64, mimeType, filename) {
+  const folder = getImageFolder();
+  const bytes = Utilities.base64Decode(imageDataBase64);
+  const blob = Utilities.newBlob(bytes, mimeType || "image/jpeg", filename || ("listing-" + new Date().getTime() + ".jpg"));
+  const file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  // This lh3.googleusercontent.com form is the one that reliably works as a
+  // direct <img src>, unlike the drive.google.com/uc?... link.
+  return "https://lh3.googleusercontent.com/d/" + file.getId();
+}
+
+/* -----------------------------------------------------------------------
    HELPERS
    ----------------------------------------------------------------------- */
 function jsonResponse(obj) {
@@ -334,5 +374,13 @@ function jsonResponse(obj) {
  *    `{ username, password, id, listing }` to edit an existing row. All
  *    three are handled by doPost() below. Change ADMIN_USERNAME and
  *    ADMIN_PASSWORD near the top of this file before deploying.
+ * 4. The "Main Image" / "Gallery" file pickers on the Admin tab post to
+ *    `${API_BASE_URL}?action=uploadImage` with
+ *    `{ username, password, imageData, mimeType, filename }`, where
+ *    imageData is a base64 string (no "data:image/...;base64," prefix —
+ *    the frontend strips that before sending). It's handled by uploadImage()
+ *    below, which stores the photo in the "Apex Estates Listing Images"
+ *    Drive folder and returns `{ ok: true, url }` — that url is what gets
+ *    written into the listing's image/gallery fields.
  * -----------------------------------------------------------------------
  */
