@@ -1,0 +1,338 @@
+/**
+ * =============================================================================
+ * APEX ESTATES — GOOGLE APPS SCRIPT BACKEND
+ * =============================================================================
+ * A Google Sheet acts as the database. This script exposes it as a small
+ * JSON API that the apex-estates.html frontend can call.
+ *
+ * SETUP
+ * -----
+ * 1. Go to https://sheet.new to create a fresh Google Sheet.
+ *    Rename it to something like "Apex Estates DB".
+ * 2. Extensions > Apps Script. Delete any starter code in Code.gs and
+ *    paste this entire file in its place.
+ * 3. In the function dropdown (top toolbar, next to Debug), select
+ *    "setupDatabase" and click Run. The first run will ask you to
+ *    authorize the script — approve it (it only touches this one sheet).
+ *    This creates the "Listings" and "Inquiries" tabs and seeds the
+ *    Listings tab with the 8 demo properties from the frontend's
+ *    MOCK_LISTINGS array, so you have real rows to look at immediately.
+ * 4. Deploy > New deployment > gear icon > select type "Web app".
+ *      - Execute as: Me
+ *      - Who has access: Anyone
+ *    Click Deploy and authorize again if asked.
+ * 5. Copy the "Web app URL" — it ends in /exec. That's your API_BASE_URL.
+ *
+ * IMPORTANT — updating the script later:
+ * Editing this code does NOT update the live /exec URL by itself. After
+ * changing code, go to Deploy > Manage deployments > edit (pencil) >
+ * "New version" > Deploy, so the /exec URL picks up your changes.
+ *
+ * FRONTEND CHANGES NEEDED
+ * ------------------------
+ * Apps Script serves everything from one URL (no /listings or /inquiries
+ * sub-paths like a normal REST API), so two small edits are needed in
+ * apex-estates.html — see the note at the bottom of this file.
+ * =============================================================================
+ */
+
+// CHANGE THESE before deploying — they gate the "Add Listing" admin form.
+// These values live only in the server-side script, never in page source,
+// so it's safe to keep them here as plain constants.
+const ADMIN_USERNAME = "admin";
+const ADMIN_PASSWORD = "Admin@123";
+
+const SHEET_LISTINGS = "Listings";
+const SHEET_INQUIRIES = "Inquiries";
+
+const LISTING_HEADERS = [
+  "id", "code", "title", "type", "category", "status", "price", "location",
+  "sqft", "beds", "baths", "config", "year", "image", "gallery",
+  "description", "amenities"
+];
+
+const INQUIRY_HEADERS = [
+  "timestamp", "name", "phone", "email", "message", "propertyId", "propertyTitle"
+];
+
+/* -----------------------------------------------------------------------
+   ONE-TIME SETUP — run this manually from the Apps Script editor
+   ----------------------------------------------------------------------- */
+function setupDatabase() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  let listings = ss.getSheetByName(SHEET_LISTINGS);
+  if (!listings) listings = ss.insertSheet(SHEET_LISTINGS);
+  listings.clear();
+  listings.appendRow(LISTING_HEADERS);
+  listings.setFrozenRows(1);
+  seedListings(listings);
+
+  let inquiries = ss.getSheetByName(SHEET_INQUIRIES);
+  if (!inquiries) inquiries = ss.insertSheet(SHEET_INQUIRIES);
+  inquiries.clear();
+  inquiries.appendRow(INQUIRY_HEADERS);
+  inquiries.setFrozenRows(1);
+
+  const defaultSheet = ss.getSheetByName("Sheet1");
+  if (defaultSheet && ss.getSheets().length > 2) ss.deleteSheet(defaultSheet);
+
+  SpreadsheetApp.flush();
+  Logger.log("Database ready: " + ss.getUrl());
+}
+
+function seedListings(sheet) {
+  const g = (arr) => JSON.stringify(arr); // gallery / amenities stored as JSON text in one cell
+
+  const rows = [
+    ["l1", "APX-014", "Riverside Villa", "Residential", "Villa", "Available", 42000000, "Koregaon Park, Pune",
+      3800, 4, 4, "", 2021,
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1200&q=80&auto=format&fit=crop",
+      g(["https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1200&q=80&auto=format&fit=crop",
+         "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80&auto=format&fit=crop",
+         "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80&auto=format&fit=crop"]),
+      "A four-bedroom villa set back from the road behind mature landscaping, with a double-height living room and a private garden that backs onto the river promenade.",
+      g(["24x7 Security", "Private Garden", "Covered Parking (3)", "Power Backup", "Clubhouse Access"])],
+
+    ["l2", "APX-021", "Skyline Residence", "Residential", "Apartment", "Available", 18500000, "Bandra West, Mumbai",
+      1450, 3, 3, "", 2019,
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=1200&q=80&auto=format&fit=crop",
+      g(["https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=1200&q=80&auto=format&fit=crop",
+         "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?w=1200&q=80&auto=format&fit=crop",
+         "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80&auto=format&fit=crop"]),
+      "High-floor three-bedroom residence with unobstructed sea-facing views, a modular kitchen, and access to a residents-only rooftop deck.",
+      g(["Sea View", "Modular Kitchen", "Rooftop Deck", "Gymnasium", "Reserved Parking"])],
+
+    ["l3", "APX-009", "Heritage Bungalow", "Residential", "Bungalow", "Under Offer", 26000000, "Gangapur Road, Nashik",
+      2900, 4, 3, "", 1998,
+      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=1200&q=80&auto=format&fit=crop",
+      g(["https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=1200&q=80&auto=format&fit=crop",
+         "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=1200&q=80&auto=format&fit=crop",
+         "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1200&q=80&auto=format&fit=crop"]),
+      "A restored 1990s bungalow on a quiet tree-lined street, with a wraparound veranda and mature orchard trees on an oversized plot.",
+      g(["Private Orchard", "Veranda", "Servant Quarters", "Borewell", "Ample Parking"])],
+
+    ["l4", "APX-032", "Garden Duplex", "Residential", "Duplex", "Available", 9500000, "Cidco, Chhatrapati Sambhajinagar",
+      1850, 3, 2, "", 2022,
+      "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1200&q=80&auto=format&fit=crop",
+      g(["https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1200&q=80&auto=format&fit=crop",
+         "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=1200&q=80&auto=format&fit=crop",
+         "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80&auto=format&fit=crop"]),
+      "A new-build duplex with a private lawn, double-height living area, and an attached study on the ground floor.",
+      g(["Private Lawn", "Study Room", "Covered Parking (2)", "Solar Water Heating", "Gated Community"])],
+
+    ["l5", "APX-041", "BKC Corporate Suite", "Commercial", "Office", "Available", 38000000, "Bandra Kurla Complex, Mumbai",
+      4200, "", "", "Grade-A · Floor 11", 2020,
+      "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1200&q=80&auto=format&fit=crop",
+      g(["https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1200&q=80&auto=format&fit=crop",
+         "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80&auto=format&fit=crop",
+         "https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?w=1200&q=80&auto=format&fit=crop"]),
+      "A fitted, move-in-ready office floor in a Grade-A tower with panoramic city views, ideal for a mid-size corporate headquarters.",
+      g(["Central AC", "High-Speed Elevators", "24x7 Access", "Cafeteria in Building", "Basement Parking"])],
+
+    ["l6", "APX-018", "High Street Retail Unit", "Commercial", "Retail", "Available", 12000000, "FC Road, Pune",
+      950, "", "", "Ground Floor · Frontage 22ft", 2015,
+      "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80&auto=format&fit=crop",
+      g(["https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80&auto=format&fit=crop",
+         "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1200&q=80&auto=format&fit=crop",
+         "https://images.unsplash.com/photo-1524230659092-07f99a75c013?w=1200&q=80&auto=format&fit=crop"]),
+      "Ground-floor retail frontage on one of Pune's busiest high streets, with strong footfall and prior use as a flagship apparel store.",
+      g(["High Footfall Street", "Wide Frontage", "Storage Mezzanine", "Signage Rights", "Nearby Parking"])],
+
+    ["l7", "APX-027", "Business Park Unit", "Commercial", "Office", "Sold", 8500000, "MIDC, Nashik",
+      1600, "", "", "Grade-B · Ground Floor", 2017,
+      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&q=80&auto=format&fit=crop",
+      g(["https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&q=80&auto=format&fit=crop",
+         "https://images.unsplash.com/photo-1462826303086-329426d1aef5?w=1200&q=80&auto=format&fit=crop",
+         "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=1200&q=80&auto=format&fit=crop"]),
+      "A compact ground-floor office unit within a gated business park, previously fitted out for a 25-seat operations team.",
+      g(["Gated Business Park", "Dedicated Parking", "Power Backup", "Loading Access", "Security"])],
+
+    ["l8", "APX-005", "Highway-Facing Plot", "Commercial", "Land", "Available", 6500000, "Sillod Road, Chhatrapati Sambhajinagar",
+      6000, "", "", "NA Plot · Highway Frontage", "",
+      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&q=80&auto=format&fit=crop",
+      g(["https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&q=80&auto=format&fit=crop"]),
+      "A cleared, NA-converted plot with direct highway frontage, suited for a warehouse, showroom or fuel outlet development.",
+      g(["Highway Frontage", "NA Converted", "Clear Title", "Electricity Line Nearby", "Level Ground"])],
+  ];
+
+  rows.forEach((row) => sheet.appendRow(row));
+}
+
+/* -----------------------------------------------------------------------
+   WEB APP ENTRY POINTS
+   ----------------------------------------------------------------------- */
+function doGet(e) {
+  const action = (e && e.parameter && e.parameter.action) || "listings";
+  try {
+    if (action === "listings") return jsonResponse(getListings());
+    return jsonResponse({ error: "Unknown action: " + action });
+  } catch (err) {
+    return jsonResponse({ error: err.message });
+  }
+}
+
+function doPost(e) {
+  const action = (e && e.parameter && e.parameter.action) || "inquiry";
+  try {
+    const data = JSON.parse(e.postData.contents);
+
+    if (action === "inquiry") {
+      saveInquiry(data);
+      return jsonResponse({ ok: true });
+    }
+
+    if (action === "login") {
+      if (data.username !== ADMIN_USERNAME || data.password !== ADMIN_PASSWORD) {
+        return jsonResponse({ error: "Unauthorized" });
+      }
+      return jsonResponse({ ok: true });
+    }
+
+    if (action === "addListing") {
+      if (data.username !== ADMIN_USERNAME || data.password !== ADMIN_PASSWORD) {
+        return jsonResponse({ error: "Unauthorized" });
+      }
+      const id = addListing(data.listing);
+      return jsonResponse({ ok: true, id: id });
+    }
+
+    if (action === "updateListing") {
+      if (data.username !== ADMIN_USERNAME || data.password !== ADMIN_PASSWORD) {
+        return jsonResponse({ error: "Unauthorized" });
+      }
+      updateListing(data.id, data.listing);
+      return jsonResponse({ ok: true });
+    }
+
+    return jsonResponse({ error: "Unknown action: " + action });
+  } catch (err) {
+    return jsonResponse({ error: err.message });
+  }
+}
+
+/* -----------------------------------------------------------------------
+   DATA ACCESS
+   ----------------------------------------------------------------------- */
+function getListings() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_LISTINGS);
+  const rows = sheet.getDataRange().getValues();
+  const headers = rows.shift();
+
+  return rows
+    .filter((row) => row[0] !== "") // skip blank trailing rows
+    .map((row) => {
+      const obj = {};
+      headers.forEach((header, i) => {
+        let val = row[i];
+        if (header === "gallery" || header === "amenities") {
+          try { val = val ? JSON.parse(val) : []; } catch (parseErr) { val = []; }
+        } else if (val === "") {
+          val = header === "config" ? undefined : null;
+        }
+        if (val !== undefined) obj[header] = val;
+      });
+      return obj;
+    });
+}
+
+function addListing(listing) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_LISTINGS);
+  const id = "l" + new Date().getTime();
+
+  const row = LISTING_HEADERS.map((header) => {
+    if (header === "id") return id;
+    let val = listing[header];
+    if (header === "gallery" || header === "amenities") {
+      return JSON.stringify(Array.isArray(val) ? val : []);
+    }
+    return val === null || val === undefined ? "" : val;
+  });
+
+  sheet.appendRow(row);
+  return id;
+}
+
+function updateListing(id, listing) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_LISTINGS);
+  const rows = sheet.getDataRange().getValues();
+
+  for (let r = 1; r < rows.length; r++) { // r=0 is row 1 (header), skip it
+    if (String(rows[r][0]) === String(id)) {
+      const rowValues = LISTING_HEADERS.map((header) => {
+        if (header === "id") return id; // id itself never changes
+        let val = listing[header];
+        if (header === "gallery" || header === "amenities") {
+          return JSON.stringify(Array.isArray(val) ? val : []);
+        }
+        return val === null || val === undefined ? "" : val;
+      });
+      sheet.getRange(r + 1, 1, 1, rowValues.length).setValues([rowValues]);
+      return;
+    }
+  }
+  throw new Error("Listing not found: " + id);
+}
+
+function saveInquiry(payload) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_INQUIRIES);
+  sheet.appendRow([
+    new Date(),
+    payload.name || "",
+    payload.phone || "",
+    payload.email || "",
+    payload.message || "",
+    payload.propertyId || "",
+    payload.propertyTitle || "",
+  ]);
+}
+
+/* -----------------------------------------------------------------------
+   HELPERS
+   ----------------------------------------------------------------------- */
+function jsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * -----------------------------------------------------------------------
+ * FRONTEND CHANGES NEEDED IN apex-estates.html
+ * -----------------------------------------------------------------------
+ * Apps Script only gives you one URL (ending in /exec) — it can't do
+ * /listings and /inquiries as separate paths like a real REST API. So:
+ *
+ * 1. Set:
+ *      const USE_MOCK_DATA = false;
+ *      const API_BASE_URL = "https://script.google.com/macros/s/XXXXX/exec";
+ *
+ * 2. Replace fetchListings() and submitInquiry() with:
+ *
+ *   async function fetchListings() {
+ *     const res = await fetch(`${API_BASE_URL}?action=listings`);
+ *     if (!res.ok) throw new Error("Failed to load listings");
+ *     return res.json();
+ *   }
+ *
+ *   async function submitInquiry(payload) {
+ *     // Content-Type must be text/plain here — a JSON content-type
+ *     // triggers a CORS preflight (OPTIONS) request that Apps Script
+ *     // web apps don't handle, and the request will fail silently.
+ *     const res = await fetch(`${API_BASE_URL}?action=inquiry`, {
+ *       method: "POST",
+ *       headers: { "Content-Type": "text/plain;charset=utf-8" },
+ *       body: JSON.stringify(payload),
+ *     });
+ *     if (!res.ok) throw new Error("Failed to submit inquiry");
+ *     return res.json();
+ *   }
+ *
+ * 3. The site's Admin tab (added separately) posts to
+ *    `${API_BASE_URL}?action=login` to verify the username + password,
+ *    `${API_BASE_URL}?action=addListing` with `{ username, password, listing }`,
+ *    and `${API_BASE_URL}?action=updateListing` with
+ *    `{ username, password, id, listing }` to edit an existing row. All
+ *    three are handled by doPost() below. Change ADMIN_USERNAME and
+ *    ADMIN_PASSWORD near the top of this file before deploying.
+ * -----------------------------------------------------------------------
+ */
