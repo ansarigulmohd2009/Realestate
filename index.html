@@ -35,7 +35,7 @@
 
   /* ---- Nav ---- */
   .nav-shell { position: sticky; top: 0; z-index: 40; background: rgba(21,19,15,0.88); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
-  .nav-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; }
+  .nav-inner { max-width: 1600px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; }
   .brand-mark { display: flex; align-items: center; gap: 8px; background: none; border: none; cursor: pointer; color: var(--brass-light); font-family: 'Fraunces', serif; font-size: 18px; letter-spacing: 0.02em; padding: 0; }
   .nav-links { display: flex; gap: 28px; }
   .nav-link { background: none; border: none; cursor: pointer; color: var(--stone); font-size: 14px; font-weight: 500; padding: 6px 0; position: relative; }
@@ -62,14 +62,14 @@
   .btn-ghost:hover { border-color: var(--brass); }
 
   /* ---- Stats ---- */
-  .stat-strip { max-width: 1180px; margin: 0 auto; padding: 0 24px 64px; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); }
+  .stat-strip { max-width: 1600px; margin: 0 auto; padding: 0 24px 64px; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); }
   .stat-item { padding: 22px 0 0; text-align: center; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
   .stat-item:last-child { border-right: none; }
   .stat-value { font-family: 'IBM Plex Mono', monospace; font-size: 22px; color: var(--brass-light); }
   .stat-label { font-size: 12px; color: var(--stone-dim); text-transform: uppercase; letter-spacing: 0.06em; }
 
   /* ---- Filter bar ---- */
-  .filter-bar { max-width: 1180px; margin: 0 auto; padding: 0 24px 28px; display: flex; align-items: flex-end; gap: 28px; flex-wrap: wrap; }
+  .filter-bar { max-width: 1600px; margin: 0 auto; padding: 0 24px 28px; display: flex; align-items: flex-end; gap: 28px; flex-wrap: wrap; }
   .filter-group { display: flex; flex-direction: column; gap: 8px; }
   .filter-label { font-size: 11px; color: var(--stone-dim); text-transform: uppercase; letter-spacing: 0.08em; }
   .pill-row { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -82,7 +82,7 @@
   .filter-count { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--stone-dim); margin-left: auto; white-space: nowrap; }
 
   /* ---- Grid / cards ---- */
-  .ledger-grid { max-width: 1180px; margin: 0 auto; padding: 0 24px 80px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .ledger-grid { max-width: 1600px; margin: 0 auto; padding: 0 24px 80px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
   .ledger-card { background: var(--ink-2); border: 1px solid var(--line); border-radius: 3px; overflow: hidden; cursor: pointer; transition: transform 0.18s ease, border-color 0.18s ease; }
   .ledger-card:hover { transform: translateY(-3px); border-color: var(--brass); }
   .ledger-photo-wrap { position: relative; aspect-ratio: 4/3; overflow: hidden; }
@@ -103,7 +103,7 @@
   .ledger-link { font-size: 12px; color: var(--stone); display: flex; align-items: center; gap: 3px; }
   .ledger-card:hover .ledger-link { color: var(--brass-light); }
 
-  .empty-state, .loading-state { max-width: 1180px; margin: 0 auto; padding: 60px 24px; text-align: center; color: var(--stone); }
+  .empty-state, .loading-state { max-width: 1600px; margin: 0 auto; padding: 60px 24px; text-align: center; color: var(--stone); }
   .empty-sub { font-size: 13px; color: var(--stone-dim); margin-top: 6px; }
   .loading-state { display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .spin { animation: spin 1s linear infinite; color: var(--brass); }
@@ -167,13 +167,13 @@
 
   /* ---- Footer ---- */
   .site-footer { border-top: 1px solid var(--line); padding: 48px 24px 24px; }
-  .footer-grid { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+  .footer-grid { max-width: 1600px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
   .footer-brand { color: var(--brass-light); margin-bottom: 8px; }
   .footer-tagline { color: var(--stone-dim); font-size: 13px; }
   .footer-contact, .footer-social { display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: var(--stone); }
   .footer-contact a, .footer-social a, .footer-contact span { display: flex; align-items: center; gap: 8px; }
   .footer-contact svg, .footer-social svg { color: var(--brass); }
-  .footer-bottom { max-width: 1180px; margin: 32px auto 0; padding-top: 18px; border-top: 1px solid var(--line); font-size: 12px; color: var(--stone-dim); text-align: center; }
+  .footer-bottom { max-width: 1600px; margin: 32px auto 0; padding-top: 18px; border-top: 1px solid var(--line); font-size: 12px; color: var(--stone-dim); text-align: center; }
 
   /* ---- Admin page ---- */
   .admin-page { max-width: 720px; margin: 0 auto; padding: 72px 24px 90px; }
@@ -189,11 +189,27 @@
   .admin-note { font-size: 12.5px; color: var(--stone-dim); line-height: 1.6; margin-top: 10px; }
   .admin-success { color: #8FBBA0; font-size: 13.5px; margin-top: 12px; display: none; }
   .admin-error { color: #C79383; font-size: 13px; margin-top: 10px; display: none; }
+  .admin-lock { max-width: 360px; }
+  .admin-dashboard-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+  .btn-ghost { background: transparent; border: 1px solid var(--line); color: var(--stone); padding: 9px 16px; border-radius: 2px; font-size: 12.5px; cursor: pointer; transition: border-color .15s, color .15s; }
+  .btn-ghost:hover { border-color: var(--brass); color: var(--brass); }
+  .admin-manage { margin: 28px 0; border: 1px solid var(--line); border-radius: 2px; }
+  .admin-subhead { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--stone-dim); padding: 14px 16px; border-bottom: 1px solid var(--line); margin: 0; }
+  .listing-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .listing-row:last-child { border-bottom: none; }
+  .listing-row-info { display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
+  .listing-row-info span { color: var(--stone-dim); font-size: 12px; }
+  #admin-editing-note { display: none; background: var(--ink-2); border: 1px solid var(--line); padding: 10px 14px; border-radius: 2px; }
+  #admin-editing-note a { color: var(--brass); cursor: pointer; }
 
   /* ---- View toggling ---- */
   #view-profile.hidden, #view-home.hidden, #view-admin.hidden { display: none; }
 
   /* ---- Responsive ---- */
+  @media (min-width: 1500px) {
+    .ledger-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+
   @media (max-width: 860px) {
     .nav-links { display: none; }
     .nav-burger { display: block; }
@@ -338,98 +354,123 @@
   <!-- ============================= ADMIN VIEW ============================= -->
   <section id="view-admin" class="hidden">
     <div class="admin-page">
-      <p class="eyebrow">Internal Use</p>
-      <h1 class="hero-title" style="font-size: 34px; text-align:left;">Add a Listing</h1>
-      <p class="admin-note">This writes a new row directly into the Listings sheet. The password is checked on the backend, not in this page's code.</p>
 
-      <form class="admin-form" id="admin-form">
-        <div>
-          <label>Listing Code</label>
-          <input required id="ad-code" placeholder="e.g. APX-052" />
-        </div>
-        <div>
-          <label>Title</label>
-          <input required id="ad-title" placeholder="e.g. Hilltop Residence" />
-        </div>
-        <div class="form-row">
+      <!-- LOCK SCREEN -->
+      <div id="admin-lock">
+        <p class="eyebrow">Internal Use</p>
+        <h1 class="hero-title" style="font-size: 34px; text-align:left;">Admin Login</h1>
+        <p class="admin-note">Enter the admin password to manage listings.</p>
+        <form class="admin-form admin-lock" id="admin-login-form">
           <div>
-            <label>Type</label>
-            <select id="ad-type">
-              <option>Residential</option>
-              <option>Commercial</option>
-            </select>
+            <label>Password</label>
+            <input required type="password" id="login-password" placeholder="Admin password" autocomplete="current-password" />
           </div>
+          <button class="btn-brass" type="submit" id="login-submit">Login</button>
+          <p class="admin-error" id="login-error"></p>
+        </form>
+      </div>
+
+      <!-- DASHBOARD (revealed after login) -->
+      <div id="admin-dashboard" class="hidden">
+        <div class="admin-dashboard-head">
           <div>
-            <label>Category</label>
-            <input required id="ad-category" placeholder="e.g. Villa, Apartment, Office, Retail, Land" />
+            <p class="eyebrow">Internal Use</p>
+            <h1 class="hero-title" style="font-size: 34px; text-align:left;" id="admin-form-heading">Add a Listing</h1>
           </div>
-          <div>
-            <label>Status</label>
-            <select id="ad-status">
-              <option>Available</option>
-              <option>Under Offer</option>
-              <option>Sold</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div>
-            <label>Price (₹)</label>
-            <input required type="number" id="ad-price" placeholder="e.g. 9500000" />
-          </div>
-          <div>
-            <label>Location</label>
-            <input required id="ad-location" placeholder="e.g. Baner, Pune" />
-          </div>
-          <div>
-            <label>Year Built</label>
-            <input type="number" id="ad-year" placeholder="optional" />
-          </div>
-        </div>
-        <div class="form-row">
-          <div>
-            <label>Sqft</label>
-            <input required type="number" id="ad-sqft" placeholder="e.g. 1800" />
-          </div>
-          <div>
-            <label>Beds</label>
-            <input type="number" id="ad-beds" placeholder="Residential only" />
-          </div>
-          <div>
-            <label>Baths</label>
-            <input type="number" id="ad-baths" placeholder="Residential only" />
-          </div>
-          <div>
-            <label>Config</label>
-            <input id="ad-config" placeholder="Commercial only, e.g. Grade-A · Floor 4" />
-          </div>
-        </div>
-        <div>
-          <label>Main Image URL</label>
-          <input required id="ad-image" placeholder="https://…" />
-        </div>
-        <div>
-          <label>Gallery URLs (one per line)</label>
-          <textarea id="ad-gallery" rows="3" placeholder="https://…&#10;https://…"></textarea>
-        </div>
-        <div>
-          <label>Description</label>
-          <textarea required id="ad-description" rows="3" placeholder="A few sentences about the property…"></textarea>
-        </div>
-        <div>
-          <label>Amenities (one per line)</label>
-          <textarea id="ad-amenities" rows="3" placeholder="24x7 Security&#10;Covered Parking"></textarea>
+          <button class="btn-ghost" type="button" id="admin-logout">Log out</button>
         </div>
 
-        <div class="admin-password-block">
-          <label>Admin Password</label>
-          <input required type="password" id="ad-password" placeholder="Set in Code.gs → ADMIN_PASSWORD" />
+        <div class="admin-manage">
+          <p class="admin-subhead">Existing Listings</p>
+          <div id="admin-listing-rows"><p class="admin-note" style="padding:14px 16px;">Loading…</p></div>
         </div>
 
-        <button class="btn-brass" type="submit" id="ad-submit">Add Listing</button>
-        <p class="admin-success" id="ad-success">Listing added — it'll appear on the site on next refresh.</p>
-        <p class="admin-error" id="ad-error"></p>
-      </form>
+        <p class="admin-note" id="admin-editing-note">Editing <strong id="admin-editing-title"></strong> — <a id="admin-cancel-edit">cancel, add new instead</a></p>
+
+        <form class="admin-form" id="admin-form">
+          <div>
+            <label>Listing Code</label>
+            <input required id="ad-code" placeholder="e.g. APX-052" />
+          </div>
+          <div>
+            <label>Title</label>
+            <input required id="ad-title" placeholder="e.g. Hilltop Residence" />
+          </div>
+          <div class="form-row">
+            <div>
+              <label>Type</label>
+              <select id="ad-type">
+                <option>Residential</option>
+                <option>Commercial</option>
+              </select>
+            </div>
+            <div>
+              <label>Category</label>
+              <input required id="ad-category" placeholder="e.g. Villa, Apartment, Office, Retail, Land" />
+            </div>
+            <div>
+              <label>Status</label>
+              <select id="ad-status">
+                <option>Available</option>
+                <option>Under Offer</option>
+                <option>Sold</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label>Price (₹)</label>
+              <input required type="number" id="ad-price" placeholder="e.g. 9500000" />
+            </div>
+            <div>
+              <label>Location</label>
+              <input required id="ad-location" placeholder="e.g. Baner, Pune" />
+            </div>
+            <div>
+              <label>Year Built</label>
+              <input type="number" id="ad-year" placeholder="optional" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label>Sqft</label>
+              <input required type="number" id="ad-sqft" placeholder="e.g. 1800" />
+            </div>
+            <div>
+              <label>Beds</label>
+              <input type="number" id="ad-beds" placeholder="Residential only" />
+            </div>
+            <div>
+              <label>Baths</label>
+              <input type="number" id="ad-baths" placeholder="Residential only" />
+            </div>
+            <div>
+              <label>Config</label>
+              <input id="ad-config" placeholder="Commercial only, e.g. Grade-A · Floor 4" />
+            </div>
+          </div>
+          <div>
+            <label>Main Image URL</label>
+            <input required id="ad-image" placeholder="https://…" />
+          </div>
+          <div>
+            <label>Gallery URLs (one per line)</label>
+            <textarea id="ad-gallery" rows="3" placeholder="https://…&#10;https://…"></textarea>
+          </div>
+          <div>
+            <label>Description</label>
+            <textarea required id="ad-description" rows="3" placeholder="A few sentences about the property…"></textarea>
+          </div>
+          <div>
+            <label>Amenities (one per line)</label>
+            <textarea id="ad-amenities" rows="3" placeholder="24x7 Security&#10;Covered Parking"></textarea>
+          </div>
+
+          <button class="btn-brass" type="submit" id="ad-submit">Add Listing</button>
+          <p class="admin-success" id="ad-success"></p>
+          <p class="admin-error" id="ad-error"></p>
+        </form>
+      </div>
     </div>
 
     <footer class="site-footer">
@@ -476,14 +517,14 @@ const CREDENTIALS = [
 
 const TESTIMONIALS = [
   {
-    //quote: "We looked at a dozen apartments on our own before Apex stepped in. Within three weeks we had keys to a home that actually fit our life, not just our budget.",
-    //name: "R. Kulkarni",
-    //role: "Homeowner, Pune",
+    quote: "We looked at a dozen apartments on our own before Apex stepped in. Within three weeks we had keys to a home that actually fit our life, not just our budget.",
+    name: "R. Kulkarni",
+    role: "Homeowner, Pune",
   },
   {
-    //quote: "Leasing our second retail unit could have taken months of back and forth. Apex handled the negotiation and paperwork end to end.",
-    //name: "S. Bhosale",
-    //role: "Business Owner, Nashik",
+    quote: "Leasing our second retail unit could have taken months of back and forth. Apex handled the negotiation and paperwork end to end.",
+    name: "S. Bhosale",
+    role: "Business Owner, Nashik",
   },
 ];
 
@@ -1086,14 +1127,157 @@ function wireStaticEvents() {
     });
   }
 
-  wireAdminForm();
+  wireAdmin();
 }
 
 /* =========================================================================
-   ADMIN — add a listing to the Google Sheet
+   ADMIN — login gate, add/edit listings against the Google Sheet
    ========================================================================= */
+let adminPassword = null;
+let editingListingId = null;
+
 function linesToArray(text) {
   return text.split("\n").map((s) => s.trim()).filter(Boolean);
+}
+
+function wireAdmin() {
+  wireAdminLogin();
+  wireAdminForm();
+
+  document.getElementById("admin-listing-rows").addEventListener("click", (e) => {
+    const btn = e.target.closest(".admin-edit-btn");
+    if (!btn) return;
+    const listing = allListings.find((p) => String(p.id) === String(btn.getAttribute("data-id")));
+    if (listing) populateFormForEdit(listing);
+  });
+
+  document.getElementById("admin-cancel-edit").addEventListener("click", (e) => {
+    e.preventDefault();
+    resetAdminForm();
+  });
+}
+
+function wireAdminLogin() {
+  const lockEl = document.getElementById("admin-lock");
+  const dashEl = document.getElementById("admin-dashboard");
+  const loginForm = document.getElementById("admin-login-form");
+  const loginError = document.getElementById("login-error");
+  const loginSubmit = document.getElementById("login-submit");
+
+  // Stay logged in across a page refresh within the same browser tab
+  const stored = sessionStorage.getItem("apexAdminPw");
+  if (stored && !USE_MOCK_DATA) {
+    adminPassword = stored;
+    lockEl.classList.add("hidden");
+    dashEl.classList.remove("hidden");
+    loadAdminListings();
+  }
+
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    loginError.style.display = "none";
+    const password = document.getElementById("login-password").value;
+
+    if (USE_MOCK_DATA) {
+      loginError.textContent = "Backend isn't connected yet — deploy the Apps Script, then set USE_MOCK_DATA to false and paste API_BASE_URL.";
+      loginError.style.display = "block";
+      return;
+    }
+
+    loginSubmit.disabled = true;
+    loginSubmit.textContent = "Checking…";
+    try {
+      const res = await fetch(`${API_BASE_URL}?action=login`, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ password }),
+      });
+      if (!res.ok) throw new Error("Request failed");
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      adminPassword = password;
+      sessionStorage.setItem("apexAdminPw", password);
+      loginForm.reset();
+      lockEl.classList.add("hidden");
+      dashEl.classList.remove("hidden");
+      loadAdminListings();
+    } catch (err) {
+      loginError.textContent = err.message === "Unauthorized" ? "Wrong password." : "Something went wrong — please try again.";
+      loginError.style.display = "block";
+    } finally {
+      loginSubmit.disabled = false;
+      loginSubmit.textContent = "Login";
+    }
+  });
+
+  document.getElementById("admin-logout").addEventListener("click", () => {
+    adminPassword = null;
+    sessionStorage.removeItem("apexAdminPw");
+    resetAdminForm();
+    dashEl.classList.add("hidden");
+    lockEl.classList.remove("hidden");
+  });
+}
+
+async function loadAdminListings() {
+  const rowsEl = document.getElementById("admin-listing-rows");
+  rowsEl.innerHTML = `<p class="admin-note" style="padding:14px 16px;">Loading…</p>`;
+  try {
+    allListings = await fetchListings();
+    if (!allListings.length) {
+      rowsEl.innerHTML = `<p class="admin-note" style="padding:14px 16px;">No listings yet.</p>`;
+      return;
+    }
+    rowsEl.innerHTML = allListings.map((p) => `
+      <div class="listing-row">
+        <div class="listing-row-info">
+          <strong>${escapeHtml(p.title || "Untitled")}</strong>
+          <span>${escapeHtml(p.status || "")} · ₹${(p.price || 0).toLocaleString("en-IN")} · ${escapeHtml(p.location || "")}</span>
+        </div>
+        <button type="button" class="btn-ghost admin-edit-btn" data-id="${escapeHtml(String(p.id))}">Edit</button>
+      </div>
+    `).join("");
+  } catch (err) {
+    rowsEl.innerHTML = `<p class="admin-error" style="display:block; padding:14px 16px;">Couldn't load listings.</p>`;
+  }
+}
+
+function populateFormForEdit(listing) {
+  editingListingId = listing.id;
+  document.getElementById("ad-code").value = listing.code || "";
+  document.getElementById("ad-title").value = listing.title || "";
+  document.getElementById("ad-type").value = listing.type || "Residential";
+  document.getElementById("ad-category").value = listing.category || "";
+  document.getElementById("ad-status").value = listing.status || "Available";
+  document.getElementById("ad-price").value = listing.price ?? "";
+  document.getElementById("ad-location").value = listing.location || "";
+  document.getElementById("ad-year").value = listing.year ?? "";
+  document.getElementById("ad-sqft").value = listing.sqft ?? "";
+  document.getElementById("ad-beds").value = listing.beds ?? "";
+  document.getElementById("ad-baths").value = listing.baths ?? "";
+  document.getElementById("ad-config").value = listing.config || "";
+  document.getElementById("ad-image").value = listing.image || "";
+  document.getElementById("ad-gallery").value = (listing.gallery || []).join("\n");
+  document.getElementById("ad-description").value = listing.description || "";
+  document.getElementById("ad-amenities").value = (listing.amenities || []).join("\n");
+
+  document.getElementById("ad-submit").textContent = "Update Listing";
+  document.getElementById("admin-form-heading").textContent = "Edit Listing";
+  document.getElementById("admin-editing-note").style.display = "block";
+  document.getElementById("admin-editing-title").textContent = listing.title || listing.id;
+  document.getElementById("ad-success").style.display = "none";
+  document.getElementById("ad-error").style.display = "none";
+  document.getElementById("admin-form").scrollIntoView({ behavior: "smooth" });
+}
+
+function resetAdminForm() {
+  editingListingId = null;
+  const form = document.getElementById("admin-form");
+  if (form) form.reset();
+  document.getElementById("ad-submit").textContent = "Add Listing";
+  document.getElementById("admin-form-heading").textContent = "Add a Listing";
+  document.getElementById("admin-editing-note").style.display = "none";
 }
 
 function wireAdminForm() {
@@ -1109,6 +1293,11 @@ function wireAdminForm() {
 
     if (USE_MOCK_DATA) {
       errorEl.textContent = "Backend isn't connected yet — deploy the Apps Script, then set USE_MOCK_DATA to false and paste API_BASE_URL.";
+      errorEl.style.display = "block";
+      return;
+    }
+    if (!adminPassword) {
+      errorEl.textContent = "Session expired — please log in again.";
       errorEl.style.display = "block";
       return;
     }
@@ -1131,32 +1320,50 @@ function wireAdminForm() {
       description: document.getElementById("ad-description").value,
       amenities: linesToArray(document.getElementById("ad-amenities").value),
     };
-    const password = document.getElementById("ad-password").value;
 
+    const isEdit = !!editingListingId;
     submitBtn.disabled = true;
-    submitBtn.textContent = "Adding…";
+    submitBtn.textContent = isEdit ? "Updating…" : "Adding…";
 
     try {
-      const res = await fetch(`${API_BASE_URL}?action=addListing`, {
+      const action = isEdit ? "updateListing" : "addListing";
+      const body = isEdit
+        ? { password: adminPassword, id: editingListingId, listing }
+        : { password: adminPassword, listing };
+
+      const res = await fetch(`${API_BASE_URL}?action=${action}`, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ password, listing }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error("Request failed");
       const data = await res.json();
       if (data.error) throw new Error(data.error);
 
+      successEl.textContent = isEdit
+        ? "Listing updated — it'll refresh on the site on next load."
+        : "Listing added — it'll appear on the site on next refresh.";
       successEl.style.display = "block";
-      form.reset();
-      // Refresh the in-memory listings so it shows up without a page reload
-      allListings = await fetchListings();
+      resetAdminForm();
+      // Refresh both the manage table and the public grid
+      await loadAdminListings();
       renderGrid();
     } catch (err) {
-      errorEl.textContent = err.message === "Unauthorized" ? "Wrong password." : "Something went wrong — please try again.";
-      errorEl.style.display = "block";
+      if (err.message === "Unauthorized") {
+        // Stored password no longer matches ADMIN_PASSWORD on the backend
+        adminPassword = null;
+        sessionStorage.removeItem("apexAdminPw");
+        document.getElementById("admin-dashboard").classList.add("hidden");
+        document.getElementById("admin-lock").classList.remove("hidden");
+        document.getElementById("login-error").textContent = "Your session is no longer valid — please log in again.";
+        document.getElementById("login-error").style.display = "block";
+      } else {
+        errorEl.textContent = "Something went wrong — please try again.";
+        errorEl.style.display = "block";
+      }
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = "Add Listing";
+      submitBtn.textContent = isEdit ? "Update Listing" : "Add Listing";
     }
   });
 }
